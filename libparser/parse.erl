@@ -18,40 +18,75 @@ parse(Fs) ->
     lists:map(fun walk_syntax_tree/1, Fs).
 
 walk_syntax_tree(N) ->
-    io:format("WST:~n ~s~n", [erl_prettypr:format(N)]),
-%    io:format("WST RAW:~n ~s~n", [erl_prettypr:format(N)]),
-    io:format("WST RAW:~n ~w~n", [N]),
-    case N of 
-	{tree, function, _Attr, {func, {tree, atom, {attr, LineNumber, _, _}, Fname}, Rest}}  ->
-	    S = #symbol{type=def, name=atom_to_list(Fname), lineno=LineNumber},
-	    io:format("## ~w~n", [S]),
-	    Subs = lists:map(fun walk_syntax_tree/1, Rest),
-	    [S|Subs];
-	{tree, clause, _Attr, {clause, Vars, _, Rest}} ->
-	    io:format("%% ~w~n", [Rest]),
-	    lists:map(fun walk_syntax_tree/1, Vars)
-		++ lists:map(fun walk_syntax_tree/1, Rest);
-	{tree, application, _Attr, {application, {atom, LineNumber, Fname}, Vars}} ->
-	    io:format("$$ ~w: ~w~n", [Fname, Vars]),
-	    S = #symbol{type=refsym, name=atom_to_list(Fname), lineno=LineNumber},
-	    Subs = lists:map(fun walk_syntax_tree/1, Vars),
-	    [S|Subs];
-	{tree, infix_expr, _Attr, {infix_expr, _Op, T1, T2}} ->
-	    lists:map(fun walk_syntax_tree/1, [T1])
-		++ lists:map(fun walk_syntax_tree/1, [T2]);
-	{tree, match_expr, _Attr,
-	 {match_expr, LeftNode, RightNode}} ->
-	    Left = walk_syntax_tree(LeftNode),
-	    Right = walk_syntax_tree(RightNode),
-	    Left ++ Right;
-	{var, LineNumber, VarName} ->
-	    [#symbol{type=refsym, name=VarName, lineno=LineNumber}];
-	{tree, atom, _Attr, Aname} ->
-	    [#symbol{type=refsym, name=Aname}];
-	record_expr ->
-	    [];
-	record_access ->
-	    [];
+%    io:format("WST:~n ~s~n", [erl_prettypr:format(N)]),
+%    io:format("WST RAW:~n ~w~n", [N]),
+    S = get_symbol(N),
+    Subs = lists:map(fun walk_syntax_tree/1, lists:flatten(erl_syntax:subtrees(N))),
+    [S | Subs].
+
+get_symbol(N) ->
+    case erl_syntax:type(N) of
+	atom ->
+	    #symbol{type=refsym,
+		    name=erl_syntax:atom_literal(N),
+		    lineno=erl_syntax:get_pos(N)};
+	variable ->
+	    #symbol{type=refsym,
+		    name=erl_syntax:variable_literal(N),
+		    lineno=erl_syntax:get_pos(N)};
+	function ->
+	    #symbol{type=def,
+		    name=erl_syntax:atom_literal(erl_syntax:function_name(N)),
+		    lineno=erl_syntax:get_pos(N)};
+	attribute ->
+	    io:format("ATTRIBUTE: ~w~n", [N]),
+	    case erl_syntax:atom_literal(erl_syntax:attribute_name(N)) of
+		"define" ->
+		    V = find_first_var(N),
+		    #symbol{type=def,
+			    name=erl_syntax:variable_literal(V),
+			    lineno=erl_syntax:get_pos(V)};
+		_ ->
+		    io:format("Ignored attribute: ~s~n", [erl_syntax:atom_literal(erl_syntax:attribute_name(N))]),
+		    []
+	    end;
 	_ ->
+	    io:format("Ignored node: ~w~n", [N]),
 	    []
+	    %% ignored node types:
+	    %% application arity_qualifier
+	    %% binary binary_field block_expr case_expr 
+	    %% catch_expr char class_qualifier clause 
+	    %% comment cond_expr conjunction disjunction 
+	    %% eof_marker error_marker float form_list 
+	    %% fun_expr generator if_expr 
+	    %% implicit_fun infix_expr integer list 
+	    %% list_comp match_expr module_qualifier 
+	    %% nil operator parentheses prefix_expr 
+	    %% receive_expr record_access 
+	    %% record_expr record_field record_index_expr rule 
+	    %% size_qualifier string text try_expr 
+	    %% tuple underscore warning_marker
     end.
+
+% Finds the first var node under N
+find_first_var(N) ->
+    Vs = case erl_syntax:type(N) of
+	     variable ->
+		 [N];
+	     atom ->
+		 [];
+	     string ->
+		 [];
+	     _ ->
+		 Subs = lists:flatten(erl_syntax:subtrees(N)),
+		 lists:flatten(lists:map(fun find_first_var/1, Subs))
+	 end,
+    if
+	length(Vs) > 0 ->
+	    hd(Vs);
+	true -> []
+    end.
+
+
+	    

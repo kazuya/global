@@ -2,11 +2,16 @@
 
 -export([testfun/1]).
 
+-define(MACRO0, "Macro0").
+-define(MACRO1(Q, R), Q + R).
+
+-record(person, {name, phone, address}).
+
 testfun(X) ->
     Z = abs(X),
-    Y = X + Z,
+    Y = ?MACRO1(X, Z),
     case X of
       0 -> 0;
-      Y -> false;
+      Y -> #person{name="Foo", phone=123, address="Nowhere"};
       _ -> true
     end.
