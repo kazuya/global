@@ -12,6 +12,6 @@ testfun(X) ->
     Y = ?MACRO1(X, Z),
     case X of
       0 -> 0;
-      Y -> #person{name="Foo", phone=123, address="Nowhere"};
+      Y -> #person{name="Foo", phone=Z, address="Nowhere"};
       _ -> true
     end.

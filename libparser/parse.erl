@@ -50,6 +50,10 @@ get_symbol(N) ->
 		    io:format("Ignored attribute: ~s~n", [erl_syntax:atom_literal(erl_syntax:attribute_name(N))]),
 		    []
 	    end;
+	record_field ->
+	    #symbol{type=refsym,
+		    name=erl_syntax:atom_literal(erl_syntax:record_field_name(N)),
+		    lineno=erl_syntax:get_pos(N)};
 	_ ->
 	    io:format("Ignored node: ~w~n", [N]),
 	    []
