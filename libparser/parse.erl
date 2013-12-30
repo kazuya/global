@@ -1,10 +1,22 @@
 -module(parse).
--export([parse_file/1]).
+-export([get_symbols/1]).
 
 -record(symbol, {type :: 'refsym' | 'def',
 		name :: string(),
 		lineno=0 :: integer(),
 		line="" :: string()}).
+
+get_symbols(Filename) ->
+    Ls = get_lines(Filename),
+    Ss = parse_file(Filename),
+    lists:map(fun(S) ->
+		      L = lists:nth(S#symbol.lineno, Ls),
+		      S#symbol{line=binary:bin_to_list(L)}
+	      end, Ss).
+
+get_lines(Filename) ->
+    {ok, D} = file:read_file(Filename),
+    binary:split(D, <<10>>, [global]).
 
 parse_file(Filename) ->
     case epp_dodger:parse_file(Filename) of
