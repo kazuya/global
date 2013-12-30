@@ -15,7 +15,7 @@ parse_file(Filename) ->
     end.
 
 parse(Fs) ->
-    lists:map(fun walk_syntax_tree/1, Fs).
+    lists:flatten(lists:map(fun walk_syntax_tree/1, Fs)).
 
 walk_syntax_tree(N) ->
 %    io:format("WST:~n ~s~n", [erl_prettypr:format(N)]),
