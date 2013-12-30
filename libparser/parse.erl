@@ -18,8 +18,6 @@ parse(Fs) ->
     lists:flatten(lists:map(fun walk_syntax_tree/1, Fs)).
 
 walk_syntax_tree(N) ->
-%    io:format("WST:~n ~s~n", [erl_prettypr:format(N)]),
-%    io:format("WST RAW:~n ~w~n", [N]),
     S = get_symbol(N),
     Subs = lists:map(fun walk_syntax_tree/1, lists:flatten(erl_syntax:subtrees(N))),
     [S | Subs].
@@ -39,7 +37,6 @@ get_symbol(N) ->
 		    name=erl_syntax:atom_literal(erl_syntax:function_name(N)),
 		    lineno=erl_syntax:get_pos(N)};
 	attribute ->
-	    io:format("ATTRIBUTE: ~w~n", [N]),
 	    case erl_syntax:atom_literal(erl_syntax:attribute_name(N)) of
 		"define" ->
 		    V = find_first_var(N),
@@ -47,7 +44,6 @@ get_symbol(N) ->
 			    name=erl_syntax:variable_literal(V),
 			    lineno=erl_syntax:get_pos(V)};
 		_ ->
-		    io:format("Ignored attribute: ~s~n", [erl_syntax:atom_literal(erl_syntax:attribute_name(N))]),
 		    []
 	    end;
 	record_field ->
@@ -55,7 +51,6 @@ get_symbol(N) ->
 		    name=erl_syntax:atom_literal(erl_syntax:record_field_name(N)),
 		    lineno=erl_syntax:get_pos(N)};
 	_ ->
-	    io:format("Ignored node: ~w~n", [N]),
 	    []
 	    %% ignored node types:
 	    %% application arity_qualifier
@@ -91,6 +86,3 @@ find_first_var(N) ->
 	    hd(Vs);
 	true -> []
     end.
-
-
-	    
