@@ -1,6 +1,6 @@
 -module(test).
 
--export([testfun/1]).
+-export([testfun/1, foo/2]).
 
 -define(MACRO0, "Macro0").
 -define(MACRO1(Q, R), Q + R).
@@ -15,3 +15,6 @@ testfun(X) ->
       Y -> #person{name="Foo", phone=Z, address="Nowhere"};
       _ -> true
     end.
+
+foo(X, Y) ->
+    X + Y.

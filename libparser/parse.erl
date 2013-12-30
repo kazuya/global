@@ -23,19 +23,20 @@ walk_syntax_tree(N) ->
     [S | Subs].
 
 get_symbol(N) ->
+    LineNumber = erl_syntax:get_pos(N),
     case erl_syntax:type(N) of
-	atom ->
+	atom when LineNumber > 0 ->
 	    #symbol{type=refsym,
 		    name=erl_syntax:atom_literal(N),
-		    lineno=erl_syntax:get_pos(N)};
+		    lineno=LineNumber};
 	variable ->
 	    #symbol{type=refsym,
 		    name=erl_syntax:variable_literal(N),
-		    lineno=erl_syntax:get_pos(N)};
+		    lineno=LineNumber};
 	function ->
 	    #symbol{type=def,
 		    name=erl_syntax:atom_literal(erl_syntax:function_name(N)),
-		    lineno=erl_syntax:get_pos(N)};
+		    lineno=LineNumber};
 	attribute ->
 	    case erl_syntax:atom_literal(erl_syntax:attribute_name(N)) of
 		"define" ->
@@ -49,7 +50,7 @@ get_symbol(N) ->
 	record_field ->
 	    #symbol{type=refsym,
 		    name=erl_syntax:atom_literal(erl_syntax:record_field_name(N)),
-		    lineno=erl_syntax:get_pos(N)};
+		    lineno=LineNumber};
 	_ ->
 	    []
 	    %% ignored node types:
