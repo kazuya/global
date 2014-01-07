@@ -297,6 +297,20 @@ AC_ARG_WITH(posix-sort,
 AC_DEFINE_UNQUOTED(POSIX_SORT, "$POSIX_SORT", [POSIX sort program.])
 AC_SUBST(POSIX_SORT)
 
+dnl
+dnl Erlang support
+dnl
+AC_ARG_WITH([erlang],
+	[AS_HELP_STRING([--with-erlang], [enable support for Erlang])],
+	[with_erlang=yes],
+	[with_erlang=no])
+AS_IF([test "x$with_erlang" != xno],
+	[AC_ERLANG_CHECK_LIB([erl_interface],
+		[echo "erl_interface version \"$ERLANG_LIB_VER_stdlib\""
+		echo "is installed in \"$ERLANG_LIB_DIR_stdlib\""],
+		[AC_MSG_ERROR([erl_interface was not found!])])],
+	[AC_MSG_FAILURE([no Elang installation was found])])
+
 AC_SUBST(INCLUDES)
 AC_SUBST(LDADD)
 AC_SUBST(LDFLAGS)
@@ -308,8 +322,8 @@ dnl DEFAULTSKIP: You need not list files whoes first character of name is '.'.
 dnl		Such files are skipped even in case of not being in the list.
 dnl
 DEFAULTSKIP='HTML/,HTML.pub/,tags,TAGS,ID,y.tab.c,y.tab.h,cscope.out,cscope.po.out,cscope.in.out,SCCS/,RCS/,CVS/,CVSROOT/,{arch}/,autom4te.cache/'
-DEFAULTLANGMAP='c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml'
-DEFAULTINCLUDEFILESUFFIXES='h,hh,hxx,hpp,H,inc.php'
+DEFAULTLANGMAP='c:.c.h,yacc:.y,asm:.s.S,java:.java,cpp:.c++.cc.hh.cpp.cxx.hxx.hpp.C.H,php:.php.php3.phtml,erlang:.erl.hrl'
+DEFAULTINCLUDEFILESUFFIXES='h,hh,hxx,hpp,H,inc.php,erl'
 AC_SUBST(DEFAULTSKIP)
 AC_SUBST(DEFAULTLANGMAP)
 AC_SUBST(DEFAULTINCLUDEFILESUFFIXES)

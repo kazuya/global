@@ -98,6 +98,7 @@ if ($perl) {
 		if ($prefix eq 'sharp') {
 			if ($type eq 'sharp' && $id ne '##') {
 				$id =~ s/#//g;
+				$id =~ s/-/_/g;
 				push(@array, $id);
 			}
 		} else {
@@ -163,6 +164,7 @@ while(<IP>) {
 	@id = split(/,/, $id);
 	$upper = $id[0];
 	$upper =~ tr/a-z/A-Z/;
+	$upper =~ tr/-/_/;
 	if ($type eq 'word') {
 		$upper =~ s/::/WCOLON/;
 		print "#define ${PRE}_${upper}\t${n_word}\n";
@@ -201,6 +203,7 @@ while(<IP>) {
 	@id = split(/,/, $id);
 	$upper = $id[0];
 	$upper =~ tr/a-z/A-Z/;
+	$upper =~ tr/-/_/;
 	for ($i = 0; $i < @id; $i++) {
 		$name = $id[$i];
 		if ($type eq 'word') {

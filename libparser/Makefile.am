@@ -14,10 +14,13 @@ noinst_LIBRARIES = libgloparser.a
 
 noinst_HEADERS = parser.h internal.h asm_parse.h \
 		c_res.h cpp_res.h java_res.h php_res.h asm_res.h asm_parse.h
+#		erlang_res.h
 
-libgloparser_a_SOURCES = parser.c C.c Cpp.c asm_parse.c asm_scan.c java.c php.c
+libgloparser_a_SOURCES = parser.c C.c Cpp.c asm_parse.c asm_scan.c java.c php.c erl_parse_interface.c
 
-INCLUDES = @INCLUDES@
+INCLUDES = @INCLUDES@ -I/usr/local/otp/lib/erlang/lib/erl_interface-3.7.14/include
+
+# ld -lc -L/usr/local/otp/lib/erlang/lib/erl_interface-3.7.14/lib /usr/lib/crt1.o ei_test.o -lerl_interface -lei  -o ei_test
 
 libgloparser_a_DEPENDENCIES = $(libgloparser_a_LIBADD)
 
@@ -27,3 +30,4 @@ EXTRA_DIST = reserved.pl HACKING \
 		java_res.in java_res.gpf \
 		php_res.in php_res.gpf php.l \
 		asm_res.in asm_res.gpf asm_parse.y asm_scan.l
+#		erlang_res.in erlang_res.gpf
