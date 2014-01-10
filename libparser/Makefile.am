@@ -18,10 +18,6 @@ noinst_HEADERS = parser.h internal.h asm_parse.h \
 
 libgloparser_a_SOURCES = parser.c C.c Cpp.c asm_parse.c asm_scan.c java.c php.c erl_parse_interface.c
 
-INCLUDES = @INCLUDES@ -I/usr/local/otp/lib/erlang/lib/erl_interface-3.7.14/include
-
-# ld -lc -L/usr/local/otp/lib/erlang/lib/erl_interface-3.7.14/lib /usr/lib/crt1.o ei_test.o -lerl_interface -lei  -o ei_test
-
 libgloparser_a_DEPENDENCIES = $(libgloparser_a_LIBADD)
 
 EXTRA_DIST = reserved.pl HACKING \

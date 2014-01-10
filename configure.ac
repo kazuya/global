@@ -300,16 +300,36 @@ AC_SUBST(POSIX_SORT)
 dnl
 dnl Erlang support
 dnl
+dnl AC_ERLANG_NEED_ERL
 AC_ARG_WITH([erlang],
 	[AS_HELP_STRING([--with-erlang], [enable support for Erlang])],
-	[with_erlang=yes],
+	[if test "$withval" != 'no'; then
+		case "$withval" in
+		''|yes)
+			;;
+		*)
+			if ! test -d $withval; then
+				AC_MSG_ERROR([directory $withval not found.])
+			fi
+			if ! test -r $withval/bin/erl; then
+				AC_MSG_ERROR([Erlang interpreter not found.])
+			fi
+			ERL_ROOT="$withval"
+			;;
+		esac
+	fi],
 	[with_erlang=no])
+AC_ERLANG_PATH_ERLC([not found], [$ERL_ROOT/bin])
+AC_ERLANG_PATH_ERL([not found], [$ERL_ROOT/bin])
 AS_IF([test "x$with_erlang" != xno],
 	[AC_ERLANG_CHECK_LIB([erl_interface],
-		[echo "erl_interface version \"$ERLANG_LIB_VER_stdlib\""
-		echo "is installed in \"$ERLANG_LIB_DIR_stdlib\""],
+		[echo "erl_interface version \"$ERLANG_LIB_VER_erl_interface\""
+		echo "is installed in \"$ERLANG_LIB_DIR_erl_interface\""
+                INCLUDES="$INCLUDES -I$ERLANG_LIB_DIR_erl_interface/include"
+                LDFLAGS="$LDFLAGS -L$ERLANG_LIB_DIR_erl_interface/lib -lerl_interface -lei"
+		],
 		[AC_MSG_ERROR([erl_interface was not found!])])],
-	[AC_MSG_FAILURE([no Elang installation was found])])
+	[AC_MSG_FAILURE([no Erlang installation was found])])
 
 AC_SUBST(INCLUDES)
 AC_SUBST(LDADD)

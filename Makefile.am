@@ -24,8 +24,6 @@ gtags_DATA = AUTHORS COPYING ChangeLog FAQ INSTALL LICENSE NEWS README THANKS \
 
 EXTRA_DIST = ${gtags_DATA} reconf.sh convert.pl
 
-LDFLAGS = @LDFLAGS@ -L/usr/local/otp/lib/erlang/lib/erl_interface-3.7.14/lib
-
 # If you would like to install gtags.el to the lisp directory then uncomment
 # the following line.
 # dist_lisp_LISP = gtags.el

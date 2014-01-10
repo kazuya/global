@@ -16,8 +16,6 @@ global_SOURCES = global.c
 
 INCLUDES = @INCLUDES@
 
-LDFLAGS = @LDFLAGS@ -L/usr/local/otp/lib/erlang/lib/erl_interface-3.7.14/lib -lerl_interface -lei
-
 LDADD = @LDADD@
 
 global_LDADD = $(LDADD) $(LIBLTDL)

@@ -14,8 +14,6 @@ bin_PROGRAMS= gtags
 
 INCLUDES = @INCLUDES@
 
-LDFLAGS = @LDFLAGS@ -L/usr/local/otp/lib/erlang/lib/erl_interface-3.7.14/lib -lerl_interface -lei
-
 LDADD = @LDADD@
 
 gtags_LDADD = $(LDADD) $(LIBLTDL)
