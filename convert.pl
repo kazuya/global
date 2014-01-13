@@ -88,6 +88,7 @@ sub langmapstatement {
 		'java'	=> 'Java',
 		'cpp'	=> 'C++',
 		'php'	=> 'PHP',
+		'erlang'	=> 'Erlang',
 	);
 	my $line = '';
 	my @maps = split(/,/, $maps);
