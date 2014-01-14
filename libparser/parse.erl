@@ -34,22 +34,33 @@ walk_syntax_tree(N) ->
     Subs = lists:map(fun walk_syntax_tree/1, lists:flatten(erl_syntax:subtrees(N))),
     [S | Subs].
 
-get_symbol(N) ->
+check_line_number(N) ->
     LineNumber = erl_syntax:get_pos(N),
+    if
+	%% LineNumber =:= 0 ->
+	%%     1;
+	%% LineNumber =:= 0 ->
+	%%     throw({invalid_line_number, N});
+	true ->
+	    LineNumber
+    end.
+
+get_symbol(N) ->
+    LineNumber = check_line_number(N),
     case erl_syntax:type(N) of
 	atom when LineNumber > 0 ->
 	    #symbol{type=refsym,
 		    name=erl_syntax:atom_literal(N),
 		    lineno=LineNumber};
-	variable ->
+	variable when LineNumber > 0->
 	    #symbol{type=refsym,
 		    name=erl_syntax:variable_literal(N),
 		    lineno=LineNumber};
-	function ->
+	function when LineNumber > 0->
 	    #symbol{type=def,
 		    name=erl_syntax:atom_literal(erl_syntax:function_name(N)),
 		    lineno=LineNumber};
-	attribute ->
+	attribute when LineNumber > 0->
 	    case erl_syntax:atom_literal(erl_syntax:attribute_name(N)) of
 		"define" ->
 		    V = find_first_var(N),
@@ -59,7 +70,7 @@ get_symbol(N) ->
 		_ ->
 		    []
 	    end;
-	record_field ->
+	record_field when LineNumber > 0->
 	    #symbol{type=refsym,
 		    name=erl_syntax:atom_literal(erl_syntax:record_field_name(N)),
 		    lineno=LineNumber};

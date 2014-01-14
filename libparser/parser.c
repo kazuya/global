@@ -322,7 +322,7 @@ parser_exit(void)
  *	i)	arg	argument for callback routine
  */
 void
-parse_file(const char *path, int flags, PARSER_CALLBACK put, void *arg)
+parse_file(const char *path, int flags, PARSER_CALLBACK put, void *arg, int fd)
 {
 	const char *lang, *suffix;
 	const struct lang_entry *ent;
@@ -360,6 +360,7 @@ parse_file(const char *path, int flags, PARSER_CALLBACK put, void *arg)
 	param.die = die;
 	param.warning = warning;
 	param.message = message;
+	param.fd = fd;
 	ent->parser(&param);
 }
 

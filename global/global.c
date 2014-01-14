@@ -1396,6 +1396,9 @@ parsefile(char *const *argv, const char *cwd, const char *root, const char *dbpa
 		data.dbop = NULL;
 	}
 	data.fid = NULL;
+#ifdef USE_ERLANG
+	int fd = invoke_erl();
+#endif
 	parser_init(langmap, plugin_parser);
 	if (langmap != NULL)
 		free(langmap);
@@ -1445,11 +1448,14 @@ parsefile(char *const *argv, const char *cwd, const char *root, const char *dbpa
 		if (lflag && !locatestring(path, localprefix, MATCH_AT_FIRST))
 			continue;
 		data.count = 0;
-		parse_file(path, flags, put_syms, &data);
+		parse_file(path, flags, put_syms, &data, fd);
 		count += data.count;
 	}
 	args_close();
 	parser_exit();
+#ifdef USE_ERLANG
+	kill_erl(fd);
+#endif
 	/*
 	 * Settlement
 	 */

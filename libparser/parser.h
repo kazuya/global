@@ -41,7 +41,7 @@ void parser_exit(void);
 
 typedef void (*PARSER_CALLBACK)(int, const char *, int, const char *, const char *, void *);
 
-void parse_file(const char *, int, PARSER_CALLBACK, void *);
+void parse_file(const char *, int, PARSER_CALLBACK, void *, int);
 
 struct parser_param {
 	int size;		/* size of this structure */
@@ -54,6 +54,13 @@ struct parser_param {
 	void (*die)(const char *, ...);
 	void (*warning)(const char *, ...);
 	void (*message)(const char *, ...);
+#ifdef USE_ERLANG
+        int fd;
+#endif
 };
 
+#ifdef USE_ERLANG
+int invoke_erl();
+void kill_erl(int);
+#endif
 #endif

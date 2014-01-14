@@ -24,7 +24,7 @@ dnl
 AC_INIT([GNU GLOBAL],[6.1])
 AC_CONFIG_SRCDIR(global/global.c)
 AC_CONFIG_HEADERS([config.h:config-h.in])
-AC_PREREQ(2.59)
+AC_PREREQ(2.59c)
 AM_INIT_AUTOMAKE([1.9.3 gnu])
 
 dnl Checks for programs.
@@ -319,8 +319,12 @@ AC_ARG_WITH([erlang],
 		esac
 	fi],
 	[with_erlang=no])
-AC_ERLANG_PATH_ERLC([not found], [$ERL_ROOT/bin])
-AC_ERLANG_PATH_ERL([not found], [$ERL_ROOT/bin])
+AS_IF([test "x$with_erlang" != xno],
+      [
+	AC_ERLANG_PATH_ERLC([not found], [$ERL_ROOT/bin])
+	AC_ERLANG_PATH_ERL([not found], [$ERL_ROOT/bin])
+        AC_DEFINE(USE_ERLANG,1,[Define if you use Erlang.])
+      ])
 AS_IF([test "x$with_erlang" != xno],
 	[AC_ERLANG_CHECK_LIB([erl_interface],
 		[echo "erl_interface version \"$ERLANG_LIB_VER_erl_interface\""
@@ -328,7 +332,8 @@ AS_IF([test "x$with_erlang" != xno],
                 INCLUDES="$INCLUDES -I$ERLANG_LIB_DIR_erl_interface/include"
                 LDFLAGS="$LDFLAGS -L$ERLANG_LIB_DIR_erl_interface/lib -lerl_interface -lei"
 		],
-		[AC_MSG_ERROR([erl_interface was not found!])])],
+		[AC_MSG_ERROR([erl_interface was not found!])])
+	],
 	[AC_MSG_FAILURE([no Erlang installation was found])])
 
 AC_SUBST(INCLUDES)

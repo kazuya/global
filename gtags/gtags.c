@@ -58,9 +58,9 @@
 static void usage(void);
 static void help(void);
 int main(int, char **);
-int incremental(const char *, const char *);
-void updatetags(const char *, const char *, IDSET *, STRBUF *);
-void createtags(const char *, const char *);
+int incremental(const char *, const char *, int);
+void updatetags(const char *, const char *, IDSET *, STRBUF *, int);
+void createtags(const char *, const char *, int);
 int printconf(const char *);
 
 int cflag;					/* compact format */
@@ -432,6 +432,9 @@ main(int argc, char **argv)
 	/*
 	 * initialize parser.
 	 */
+#ifdef USE_ERLANG
+	int fd = invoke_erl();
+#endif
 	if (vflag && gtags_parser)
 		fprintf(stderr, " Using plug-in parser.\n");
 	parser_init(langmap, gtags_parser);
@@ -458,14 +461,14 @@ main(int argc, char **argv)
 		 */
 		if (!test("f", makepath(dbpath, dbname(GPATH), NULL)))
 			die("Old version tag file found. Please remake it.");
-		(void)incremental(dbpath, cwd);
+		(void)incremental(dbpath, cwd, fd);
 		print_statistics(statistics);
 		exit(0);
 	}
 	/*
 	 * create GTAGS and GRTAGS
 	 */
-	createtags(dbpath, cwd);
+	createtags(dbpath, cwd, fd);
 	/*
 	 * create idutils index.
 	 */
@@ -510,7 +513,7 @@ main(int argc, char **argv)
  *	r)		0: not updated, 1: updated
  */
 int
-incremental(const char *dbpath, const char *root)
+incremental(const char *dbpath, const char *root, int fd)
 {
 	STATISTICS_TIME *tim;
 	struct stat statp;
@@ -655,7 +658,7 @@ normal_update:
 		updated = 1;
 		tim = statistics_time_start("Time of updating %s and %s.", dbname(GTAGS), dbname(GRTAGS));
 		if (!idset_empty(deleteset) || strbuf_getlen(addlist) > 0)
-			updatetags(dbpath, root, deleteset, addlist);
+			  updatetags(dbpath, root, deleteset, addlist, fd);
 		if (strbuf_getlen(deletelist) + strbuf_getlen(addlist_other) > 0) {
 			const char *start, *end, *p;
 
@@ -737,7 +740,7 @@ put_syms(int type, const char *tag, int lno, const char *path, const char *line_
  *	i)	addlist		\0 separated list of added or modified files
  */
 void
-updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *addlist)
+updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *addlist, int fd)
 {
 	struct put_func_data data;
 	int seqno, flags;
@@ -807,12 +810,15 @@ updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *addli
 			die("GPATH is corrupted.('%s' not found)", path);
 		if (vflag)
 			fprintf(stderr, " [%d/%d] extracting tags of %s\n", ++seqno, total, path + 2);
-		parse_file(path, flags, put_syms, &data);
+		parse_file(path, flags, put_syms, &data, fd);
 		gtags_flush(data.gtop[GTAGS], data.fid);
 		if (data.gtop[GRTAGS] != NULL)
 			gtags_flush(data.gtop[GRTAGS], data.fid);
 	}
 	parser_exit();
+#ifdef USE_ERLANG
+	kill_erl(fd);
+#endif
 	gtags_close(data.gtop[GTAGS]);
 	if (data.gtop[GRTAGS] != NULL)
 		gtags_close(data.gtop[GRTAGS]);
@@ -824,7 +830,7 @@ updatetags(const char *dbpath, const char *root, IDSET *deleteset, STRBUF *addli
  *	i)	root	root directory of source tree
  */
 void
-createtags(const char *dbpath, const char *root)
+createtags(const char *dbpath, const char *root, int fd)
 {
 	STATISTICS_TIME *tim;
 	STRBUF *sb = strbuf_open(0);
@@ -871,12 +877,15 @@ createtags(const char *dbpath, const char *root)
 		seqno++;
 		if (vflag)
 			fprintf(stderr, " [%d] extracting tags of %s\n", seqno, path + 2);
-		parse_file(path, flags, put_syms, &data);
+		parse_file(path, flags, put_syms, &data, fd);
 		gtags_flush(data.gtop[GTAGS], data.fid);
 		gtags_flush(data.gtop[GRTAGS], data.fid);
 	}
 	total = seqno;
 	parser_exit();
+#ifdef USE_ERLANG
+	kill_erl(fd);
+#endif
 	find_close();
 	statistics_time_end(tim);
 	tim = statistics_time_start("Time of flushing B-tree cache");

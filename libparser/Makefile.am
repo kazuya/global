@@ -14,11 +14,15 @@ noinst_LIBRARIES = libgloparser.a
 
 noinst_HEADERS = parser.h internal.h asm_parse.h \
 		c_res.h cpp_res.h java_res.h php_res.h asm_res.h asm_parse.h
-#		erlang_res.h
 
-libgloparser_a_SOURCES = parser.c C.c Cpp.c asm_parse.c asm_scan.c java.c php.c erl_parse_interface.c
+libgloparser_a_SOURCES = parser.c C.c Cpp.c asm_parse.c asm_scan.c java.c php.c erl_parse_interface.c parse.erl
 
 libgloparser_a_DEPENDENCIES = $(libgloparser_a_LIBADD)
+
+gtagsdir = ${datadir}/gtags
+gtags_DATA = parse.beam
+
+libgloparser_a_CFLAGS = -DERL=\"@ERL@\" -DPARSE_BEAM_PATH=\"${gtagsdir}\" $(AM_CFLAGS)
 
 EXTRA_DIST = reserved.pl HACKING \
 		c_res.in c_res.gpf \
@@ -26,4 +30,8 @@ EXTRA_DIST = reserved.pl HACKING \
 		java_res.in java_res.gpf \
 		php_res.in php_res.gpf php.l \
 		asm_res.in asm_res.gpf asm_parse.y asm_scan.l
-#		erlang_res.in erlang_res.gpf
+
+SUFFIXES = .erl .beam
+.erl.beam:
+	@ERLC@ -b beam $<
+
