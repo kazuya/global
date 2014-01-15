@@ -3,16 +3,12 @@
 
 -record(symbol, {type :: 'refsym' | 'def',
 		name :: string(),
-		lineno=0 :: integer(),
-		line="" :: string()}).
+		lineno=0 :: integer()}).
 
 get_symbols(Filename) ->
     Ls = get_lines(Filename),
     Ss = parse_file(Filename),
-    lists:map(fun(S) ->
-		      L = lists:nth(S#symbol.lineno, Ls),
-		      S#symbol{line=binary:bin_to_list(L)}
-	      end, Ss).
+    Ss.
 
 get_lines(Filename) ->
     {ok, D} = file:read_file(Filename),
