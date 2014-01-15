@@ -64,9 +64,14 @@ get_symbol(N) ->
 	    case erl_syntax:atom_literal(erl_syntax:attribute_name(N)) of
 		"define" ->
 		    V = find_first_var(N),
-		    #symbol{type=def,
-			    name=erl_syntax:variable_literal(V),
-			    lineno=erl_syntax:get_pos(V)};
+		    if
+			V =/= [] ->
+			    #symbol{type=def,
+				    name=erl_syntax:variable_literal(V),
+				    lineno=erl_syntax:get_pos(V)};
+			true ->
+			    []
+		    end;
 		_ ->
 		    []
 	    end;

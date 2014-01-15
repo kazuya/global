@@ -138,7 +138,7 @@ void erlang(const struct parser_param *param)
   char atom[MAXATOMLEN];
   char name[1024];
   long line_number;
-  char line[1024];
+  char line[4096];
   for (int i = 0; i < arity; i++) {
     int tuple_arity;
     ei_decode_tuple_header(result.buff, &index, &tuple_arity);
@@ -153,7 +153,7 @@ void erlang(const struct parser_param *param)
     } else if (strncmp(atom, "def", 3) == 0) {
       PUT(PARSER_DEF, name, line_number, line);
     } else {
-      die("invalid symbol type '%s'.", atom);
+      die("invalid symbol type '%s' in file %s.", atom, abs_path);
     }
   }
 
