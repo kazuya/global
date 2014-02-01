@@ -6,13 +6,8 @@
 		lineno=0 :: integer()}).
 
 get_symbols(Filename) ->
-    Ls = get_lines(Filename),
     Ss = parse_file(Filename),
     Ss.
-
-get_lines(Filename) ->
-    {ok, D} = file:read_file(Filename),
-    binary:split(D, <<10>>, [global]).
 
 parse_file(Filename) ->
     case epp_dodger:parse_file(Filename) of
