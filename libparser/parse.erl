@@ -67,9 +67,15 @@ get_symbol(N) ->
 		    []
 	    end;
 	record_field when LineNumber > 0->
-	    #symbol{type=refsym,
-		    name=erl_syntax:atom_literal(erl_syntax:record_field_name(N)),
-		    lineno=LineNumber};
+	    FieldName = erl_syntax:record_field_name(N),
+	    case erl_syntax:type(FieldName) of
+		atom ->
+		    #symbol{type=refsym,
+			    name=erl_syntax:atom_literal(FieldName),
+			    lineno=LineNumber};
+		_ ->
+		    []
+	    end;
 	_ ->
 	    []
 	    %% ignored node types:
@@ -83,7 +89,7 @@ get_symbol(N) ->
 	    %% list_comp match_expr module_qualifier 
 	    %% nil operator parentheses prefix_expr 
 	    %% receive_expr record_access 
-	    %% record_expr record_field record_index_expr rule 
+	    %% record_expr record_index_expr rule 
 	    %% size_qualifier string text try_expr 
 	    %% tuple underscore warning_marker
     end.
