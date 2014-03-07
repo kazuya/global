@@ -48,9 +48,7 @@ get_symbol(N) ->
 		    name=erl_syntax:variable_literal(N),
 		    lineno=LineNumber};
 	function when LineNumber > 0->
-	    #symbol{type=def,
-		    name=erl_syntax:atom_literal(erl_syntax:function_name(N)),
-		    lineno=LineNumber};
+	    walk_syntax_tree(erl_syntax:function_name(N));
 	attribute when LineNumber > 0->
 	    case erl_syntax:atom_literal(erl_syntax:attribute_name(N)) of
 		"define" ->
